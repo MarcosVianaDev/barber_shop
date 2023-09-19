@@ -1,11 +1,8 @@
 from fastapi import FastAPI, WebSocket
-from fastapi.responses import HTMLResponse #, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse  #, RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 # from replit import db #banco de dados da ReplIt
-from pydantic import BaseModel #para auxiliar na documentação automática
-from datetime import datetime
-import uvicorn #para rodar o server
-
+import uvicorn  #para rodar o server
 
 ORIGINS = ["*"]
 METHODS = ["*"]
@@ -53,16 +50,13 @@ html = """
 #     content += line.replace("\n", "")
 #   return content
 
-
 # def getTime():
 #   now = datetime.now()
 #   current_time = now.strftime("%H:%M:%S")
 #   return current_time
 
-
 # class newIp(BaseModel):
-  # external_IP: str
-
+# external_IP: str
 
 app = FastAPI()
 
@@ -74,17 +68,18 @@ app = FastAPI()
 #   allow_headers=HEADERS,
 # )
 
+
 @app.get("/")
 async def get():
-    return HTMLResponse(content=html,  status_code=200)
+  return HTMLResponse(content=html, status_code=200)
 
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        await websocket.send_text(f"Message text was: {data}")
+  await websocket.accept()
+  while True:
+    data = await websocket.receive_text()
+    await websocket.send_text(f"Message text was: {data}")
 
 
 if __name__ == "__main__":
