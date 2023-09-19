@@ -1,62 +1,73 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.responses import HTMLResponse  #, RedirectResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-# from replit import db #banco de dados da ReplIt
-import uvicorn  #para rodar o server
+from typing import Annotated
 
-ORIGINS = ["*"]
-METHODS = ["*"]
-HEADERS = ["*"]
+from fastapi import (
+    Cookie,
+    Depends,
+    FastAPI,
+    Query,
+    WebSocket,
+    WebSocketException,
+    status
+)
+from fastapi.responses import HTMLResponse  # , RedirectResponse, JSONResponse
+
+# from fastapi.middleware.cors import CORSMiddleware
+# from replit import db #banco de dados da ReplIt
+import uvicorn  # para rodar o server
+
+# ORIGINS = ["*"]
+# METHODS = ["*"]
+# HEADERS = ["*"]
 
 html = """
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Chat</title>
-    </head>
-    <body>
-        <h1>WebSocket Chat</h1>
-        <form action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off"/>
-            <button>Send</button>
-        </form>
-        <ul id='messages'>
-        </ul>
-        <script>
-            const hostProtocol = (window.location.host == '0.0.0.0:8080') ? 'ws' : 'wss'
-            const ws = new WebSocket(`${hostProtocol}://${window.location.host}/ws`);
-            ws.onmessage = function(event) {
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
-            function sendMessage(event) {
-                var input = document.getElementById("messageText")
-                ws.send(input.value)
-                input.value = ''
-                event.preventDefault()
-            }
-        </script>
-    </body>
+
+<head>
+<title>Chat com FastAPI</title>
+</head>
+
+<body>
+<h1>Chat com FastAPI usando WebSocket</h1>
+<form action="" onsubmit="sendMessage(event)">
+<label>Item ID: <input type="text" id="itemId" autocomplete="off" value="foo"></label>
+<label>Token: <input type="text" id="token" autocomplete="off" value="som-key-token"></label>
+<button onclick="connect(event)">Conectar</button>
+<hr>
+<label>Mensagem: <input type="text" id="messageText" autocomplete="off" /></label>
+<button>Enviar</button>
+</form>
+<ul id='messages'>
+</ul>
+<script>
+const hostProtocol = (window.location.host == '0.0.0.0:8080' || window.location.host == 'localhost:8080') ? 'ws' : 'wss'
+var ws = null;
+function connect(event) {
+var itemId = document.getElementById('itemId')
+var token = document.getElementById('token')
+ws = new WebSocket(`${hostProtocol}://${window.location.host}/items/${itemId.value}/ws?token=${token.value}`);
+
+ws.onmessage = function (event) {
+let messages = document.getElementById('messages');
+let message = document.createElement('li');
+let content = document.createTextNode(event.data);
+message.appendChild(content)
+messages.appendChild(message)
+}
+event.preventDefault()
+}
+
+function sendMessage(event) {
+const input = document.getElementById("messageText")
+ws.send(input.value)
+input.value = ''
+event.preventDefault()
+}
+</script>
+</body>
+
 </html>
 """
-
-# def fileToString(file_to_open):
-#   content = ""
-#   file = open(file_to_open, 'r')
-#   for line in file:
-#     content += line.replace("\n", "")
-#   return content
-
-# def getTime():
-#   now = datetime.now()
-#   current_time = now.strftime("%H:%M:%S")
-#   return current_time
-
-# class newIp(BaseModel):
-# external_IP: str
 
 app = FastAPI()
 
@@ -71,17 +82,39 @@ app = FastAPI()
 
 @app.get("/")
 async def get():
-  return HTMLResponse(content=html, status_code=200)
+    return HTMLResponse(content=html, status_code=200)
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-  await websocket.accept()
-  while True:
-    data = await websocket.receive_text()
-    await websocket.send_text(f"Message text was: {data}")
+async def get_cookie_or_token(
+    websocket: WebSocket,
+    session: Annotated[str | None, Cookie()] = None,
+    token: Annotated[str | None, Query()] = None
+):
+    if session is None and token is None:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    return session or token
+
+
+
+@app.websocket("/items/{item_id}/ws")
+async def websocket_endpoint(
+    *,
+    websocket: WebSocket,
+    item_id: str,
+    q: int | None = None,
+    cookie_or_token: Annotated[str, Depends(get_cookie_or_token)]
+):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        await websocket.send_text(
+            f"Valor da sessão ou do token é: {cookie_or_token}"
+        )
+        if q is not None:
+            await websocket.send_text(f'Valor do parametro Query "q" é: {q}')
+        await websocket.send_text(f'Mensagem de texto: {data}, para o item: {item_id}')
 
 
 if __name__ == "__main__":
-  print('Runing...')
-  uvicorn.run(app, port=8080, host="0.0.0.0")
+    print('Runing...')
+    uvicorn.run(app, port=8080, host="0.0.0.0")
