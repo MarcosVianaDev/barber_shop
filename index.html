@@ -1,16 +1,34 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Chat com FastAPI</title>
-    </head>
-    <body>
-        <h1>Chat com FastAPI usando WebSocket</h1>
-        <form action="" onsubmit="sendMessage(event)">
-            <input type="text" id="messageText" autocomplete="off"/>
-            <button>Enviar</button>
-        </form>
-        <ul id='messages'>
-        </ul>
-        <script src="./scripts/main.js"></script>
-    </body>
+
+<head>
+    <title>Chat com FastAPI</title>
+</head>
+
+<body>
+    <h1>Chat com FastAPI usando WebSocket</h1>
+    <form action="" onsubmit="sendMessage(event)">
+        <input type="text" id="messageText" autocomplete="off" />
+        <button>Enviar</button>
+    </form>
+    <ul id='messages'>
+    </ul>
+    <script>
+        const ws = new WebSocket("ws://localhost:8000/ws");
+        ws.onmessage = function (event) {
+            let messages = document.getElementById('messages');
+            let message = document.createElement('li');
+            let content = document.createTextNode(event.data);
+            message.appendChild(content)
+            messages.appendChild(message)
+        }
+        function sendMessage(event) {
+            const input = document.getElementById("messageText")
+            ws.send(input.value)
+            input.value = ''
+            event.preventDefault()
+        }
+    </script>
+</body>
+
 </html>

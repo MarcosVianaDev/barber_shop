@@ -1,4 +1,4 @@
-const ws = new WebSocket("ws://localhost:8000/ws");
+const ws = new WebSocket(`ws://${window.location.host}/ws`);
 
 ws.onmessage = function(event) {
   let messages = document.getElementById('messages');
