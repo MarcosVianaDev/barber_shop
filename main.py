@@ -1,16 +1,16 @@
 from typing import Annotated
 
-from fastapi import (Cookie, Depends, FastAPI, Query, WebSocket,
-                     WebSocketException, status)
+from fastapi import (FastAPI, Query, WebSocket, WebSocketException,
+                     status)
 from fastapi.responses import HTMLResponse  # , RedirectResponse, JSONResponse
 
-# from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 # from replit import db #banco de dados da ReplIt
 import uvicorn  # para rodar o server
 
-# ORIGINS = ["*"]
-# METHODS = ["*"]
-# HEADERS = ["*"]
+ORIGINS = ["*"]
+METHODS = ["*"]
+HEADERS = ["*"]
 
 html = """
 <!DOCTYPE html>
@@ -22,9 +22,9 @@ html = """
 
 <body>
 <h1>Chat com FastAPI usando WebSocket</h1>
-<form action="" onsubmit="sendMessage(event)">
+<form onsubmit="sendMessage(event)">
 <label>Item ID: <input type="text" id="itemId" autocomplete="off" value="foo"></label>
-<label>Token: <input type="text" id="token" autocomplete="off" value="som-key-token"></label>
+<label>Token: <input type="text" id="token" autocomplete="off" value="some-key-token"></label>
 <button onclick="connect(event)">Conectar</button>
 <hr>
 <label>Mensagem: <input type="text" id="messageText" autocomplete="off" /></label>
@@ -64,41 +64,30 @@ event.preventDefault()
 
 app = FastAPI()
 
-# app.add_middleware(
-#   CORSMiddleware,
-#   allow_origins=ORIGINS,
-#   allow_credentials=True,
-#   allow_methods=METHODS,
-#   allow_headers=HEADERS,
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ORIGINS,
+    allow_credentials=True,
+    allow_methods=METHODS,
+    allow_headers=HEADERS,
+)
 
 
 @app.get("/")
 async def get():
   return HTMLResponse(content=html, status_code=200)
 
-
-async def get_cookie_or_token(websocket: WebSocket,
-                              session: Annotated[str | None,
-                                                 Cookie()] = None,
-                              token: Annotated[str | None, Query()] = None):
-  if session is None and token is None:
-    raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
-  return session or token
-
-
 @app.websocket("/items/{item_id}/ws")
-async def websocket_endpoint(
-    *,
-    websocket: WebSocket,
-    item_id: str,
-    q: int | None = None,
-    cookie_or_token: Annotated[str, Depends(get_cookie_or_token)]):
+async def websocket_endpoint(*,
+                             websocket: WebSocket,
+                             item_id: str,
+                             q: int | None = None,
+                             token: Annotated[str | None, Query()] = None):
   await websocket.accept()
   while True:
     data = await websocket.receive_text()
     await websocket.send_text(
-        f"Valor da sessão ou do token é: {cookie_or_token}")
+        f"Valor do token é: {token}")
     if q is not None:
       await websocket.send_text(f'Valor do parametro Query "q" é: {q}')
     await websocket.send_text(
