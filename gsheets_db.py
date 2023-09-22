@@ -59,7 +59,6 @@ class Gsheets_db:
 
 
     def setValues(self, range:str = 'A1', new_values: str | list = ''):
-        global sheet
         if('str' in str(type(new_values))):
             new_values = [
             [
