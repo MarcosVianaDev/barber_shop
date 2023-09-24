@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import (FastAPI, WebSocket, WebSocketException, HTTPException, status)
+from fastapi import (FastAPI, Body, WebSocket, WebSocketException)
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,6 +11,34 @@ import barber_db_data as db
 ORIGINS = ["*"]
 METHODS = ["*"]
 HEADERS = ["*"]
+
+
+class barbeiro(BaseModel):
+    nome: str
+    apelido: str
+    data_cadastro: str
+    local_trabalho: str
+    ativo: str
+
+
+class barbearia(BaseModel):
+    nome: str
+    data_cadastro: str
+    responsavel: str
+    email: str
+    telefone: str
+    cep: str
+    ativo: str
+
+
+class proprietario(BaseModel):
+    nome: str
+    data_cadastro: str
+    dono_de: str
+    telefone: str
+    email: str
+    ativo: str
+
 
 app = FastAPI()
 
@@ -22,18 +51,30 @@ app.add_middleware(
 )
 
 
-# @app.get("/")
-# async def get():
-#     return HTMLResponse(content=html, status_code=200)
+@app.post("/{aba}/new")
+async def postData(aba: str, data: Annotated[dict, Body()]):
+    result = {'aba não encontrada'}
+    if (aba == 'barbeiros'):
+        result = db.createData(aba=aba, nome=data['nome'], apelido=data['apelido'], local_trabalho=data['local_trabalho'], ativo='1')
+    if (aba == 'barbearias'):
+        result = db.createData(aba=aba, nome=data['nome'], responsavel=data['responsavel'], email=data['email'], telefone=data['telefone'], cep=data['cep'], ativo=data['ativo'])
+    if (aba == 'proprietarios'):
+        result = db.createData(aba=aba, nome=data['nome'], dono_de=data['dono_de'], telefone=data['telefone'], email=data['email'], ativo=data['ativo'])
+    return JSONResponse(content=result)
+
+
+# @app.put("/{aba}/{id}/edit")
+# async def updateData(aba: str, id: str, data: Annotated[dict, Body()]):
+#     db.updateData(aba=aba, id=id, nome=data.nome, apelido=data.apelido)
 
 
 @app.get("/{aba}/{id}")
-async def getData(aba:str, id:str):
+async def getData(aba: str, id: str):
     resp = db.getData(aba=aba, id=id)
     if resp:
         return JSONResponse(resp)
-    return JSONResponse(content = f'Id {id} not found' ,status_code=404)
-
+    return JSONResponse(content=f'Id {id} not found', status_code=404)
+#
 # @app.websocket("/items/{item_id}/ws")
 # async def websocket_endpoint(*,
 #                              websocket: WebSocket,
