@@ -9,7 +9,7 @@ CABECALHO_PROPRIETARIOS_RANGE = 'proprietarios!A:H'
 planilha = Gsheets_db()
 
 
-def raw_to_dict(raw_data: list) -> dict:
+def raw_to_dict(raw_data) -> dict:
     dict_data = {}
     for x in range(len(raw_data)):
         if x == 0:
@@ -22,7 +22,7 @@ def raw_to_dict(raw_data: list) -> dict:
     # print(dict_data)
     return dict_data
 
-def getIdRow(aba: str, id: str | None = None) -> str | None:
+def getIdRow(aba: str, id: str | None = None):
     list_id = list(planilha.getValues(range=f'{aba}!A:A'))
     if id:
         return f'{aba}!A{list_id.index([id])+1}'
@@ -30,11 +30,11 @@ def getIdRow(aba: str, id: str | None = None) -> str | None:
     
 
 def getData(aba: str, id: str | None = None):
+    raw_data = []
     if aba == 'barbearias': raw_data = planilha.getValues(range=CABECALHO_BARBEARIAS_RANGE)
     elif aba == 'barbeiros': raw_data = planilha.getValues(range=CABECALHO_BARBEIROS_RANGE)
     elif aba == 'proprietarios': raw_data = planilha.getValues(range=CABECALHO_PROPRIETARIOS_RANGE)
     dict_data = raw_to_dict(raw_data)
-    # print(dict_data)
     if id is not None:
         try:
             return dict_data[id]
@@ -42,20 +42,44 @@ def getData(aba: str, id: str | None = None):
             return None
     return dict_data
 
-def createData(aba: str, nome: str, apelido: str, local_trabalho: int | str, ativo: int):
-    dados = [[
-        getIdRow(aba=aba).__len__(),
-        nome,
-        apelido,
-        f'{date.today().day}/{date.today().month}/{date.today().year}',
-        local_trabalho,
-        ativo
-    ]]
+def createData(aba: str, nome: str, apelido: str | None = None, local_trabalho: str | None = None, ativo: str = '1', dono_de: str | None = None, telefone: str | None = None, email: str | None = None, responsavel: str | None = None, cep: str | None = None):
+    if (aba == 'barbeiros'):
+        dados = [[
+            getIdRow(aba=aba).__len__(),
+            nome,
+            apelido,
+            f'{date.today().day}/{date.today().month}/{date.today().year}',
+            local_trabalho,
+            ativo
+        ]]
+    elif (aba == 'barbearias'):
+        dados = [[
+            getIdRow(aba=aba).__len__(),
+            nome,
+            f'{date.today().day}/{date.today().month}/{date.today().year}',
+            responsavel,
+            email,
+            telefone,
+            cep,
+            ativo
+        ]]
+    elif (aba == 'proprietarios'):
+        dados = [[
+            getIdRow(aba=aba).__len__(),
+            nome,
+            f'{date.today().day}/{date.today().month}/{date.today().year}',
+            dono_de,
+            telefone,
+            email,
+            ativo
+        ]]
+    else:
+        return 'Aba não econtrada...'
     result = planilha.insertValues(
-        range=CABECALHO_BARBEIROS_RANGE, new_values=dados)
+        range=f'{aba}!A1', new_values=dados)
     return result['updates']['updatedRange']
 
-def updateData(aba:str, id: int, nome: str | None = None, apelido: str | None = None, local_trabalho: int | str | None = None, ativo: int | None = None):
+def updateData(aba:str, id: str, nome: str | None = None, apelido: str | None = None, local_trabalho: int | str | None = None, ativo: int | None = None):
     old_values = getData(aba=aba, id=id)
     item_row = getIdRow(aba=aba, id=id)
     new_values = [[
