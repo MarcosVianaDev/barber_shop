@@ -79,17 +79,36 @@ def createData(aba: str, nome: str, apelido: str | None = None, local_trabalho: 
         range=f'{aba}!A1', new_values=dados)
     return result['updates']['updatedRange']
 
-def updateData(aba:str, id: str, nome: str | None = None, apelido: str | None = None, local_trabalho: int | str | None = None, ativo: int | None = None):
-    old_values = getData(aba=aba, id=id)
+def updateData(aba:str, id: str, data_cadastro: str, nome: str | None = None, apelido: str | None = None, local_trabalho: str | None = None, ativo: str | None = None, dono_de: str | None = None, telefone: str | None = None, email: str | None = None, responsavel: str | None = None, cep: str | None = None):
     item_row = getIdRow(aba=aba, id=id)
-    new_values = [[
+    if aba == 'barbearias': new_values = [[
         id,
-        nome if nome else old_values['nome_completo'],
-        apelido if apelido else old_values['apelido'],
-        old_values['data_cadastro'],
-        local_trabalho if local_trabalho else old_values['local_trabalho'],
-        ativo if ativo is not None else old_values['ativo']
+        nome,
+        data_cadastro,
+        responsavel,
+        email,
+        telefone,
+        cep,
+        ativo
     ]]
+    elif aba == 'barbeiros': new_values = [[
+        id,
+        nome,
+        apelido,
+        data_cadastro,
+        local_trabalho,
+        ativo
+    ]]
+    elif aba == 'proprietarios': new_values = [[
+        id,
+        nome,
+        data_cadastro,
+        dono_de,
+        telefone,
+        email,
+        ativo
+    ]]
+
     resp = planilha.setValues(range=item_row, new_values=new_values)
     return resp['updatedRange']
 
