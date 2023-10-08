@@ -1,43 +1,19 @@
+from datetime import date
 from typing import Annotated
 
 from fastapi import (FastAPI, Body, WebSocket, WebSocketException, status)
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
 from fastapi.middleware.cors import CORSMiddleware
 
-import barber_db_data as db
+# import barber_db_data as db
+from tiny_db import Barber_DB
+
+db = Barber_DB()
 
 ORIGINS = ["*"]
 METHODS = ["*"]
 HEADERS = ["*"]
-
-
-# class barbeiro(BaseModel):
-#     nome: str
-#     apelido: str
-#     data_cadastro: str
-#     local_trabalho: str
-#     ativo: str
-
-
-# class barbearia(BaseModel):
-#     nome: str
-#     data_cadastro: str
-#     responsavel: str
-#     email: str
-#     telefone: str
-#     cep: str
-#     ativo: str
-
-
-# class proprietario(BaseModel):
-#     nome: str
-#     data_cadastro: str
-#     dono_de: str
-#     telefone: str
-#     email: str
-#     ativo: str
 
 
 app = FastAPI()
@@ -51,17 +27,18 @@ app.add_middleware(
 )
 
 
+
 @app.post("/{aba}/new")
 async def postData(aba: str, data: Annotated[dict, Body()]):
     result = {'aba não encontrada'}
+    data['data_cadastro'] = f'{date.today().day}/{date.today().month}/{date.today().year}'
     if (aba == 'barbeiros'):
-        result = db.createData(aba=aba, nome=data['nome'], apelido=data['apelido'], local_trabalho=data['local_trabalho'], ativo='1')
+        result = db.create_Barbeiro(data)
     elif (aba == 'barbearias'):
-        result = db.createData(aba=aba, nome=data['nome'], responsavel=data['responsavel'], email=data['email'], telefone=data['telefone'], cep=data['cep'], ativo=data['ativo'])
+        result =  db.create_Barbearia(data)
     elif (aba == 'proprietarios'):
-        result = db.createData(aba=aba, nome=data['nome'], dono_de=data['dono_de'], telefone=data['telefone'], email=data['email'], ativo=data['ativo'])
+        result =  db.create_Proprietario(data)
     return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
-
 
 @app.put("/{aba}/{id}/edit")
 async def updateData(aba: str, id: str, data: Annotated[dict, Body()]):
