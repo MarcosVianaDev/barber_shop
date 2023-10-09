@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 
 from fastapi.middleware.cors import CORSMiddleware
 
-# import barber_db_data as db
 from tiny_db import Barber_DB
 
 db = Barber_DB()
@@ -41,22 +40,27 @@ async def postData(aba: str, data: Annotated[dict, Body()]):
     return JSONResponse(content=result, status_code=status.HTTP_201_CREATED)
 
 @app.put("/{aba}/{id}/edit")
-async def updateData(aba: str, id: str, data: Annotated[dict, Body()]):
-    print(data)
-    if (aba == 'barbeiros'):
-        result = db.updateData(aba=aba, id=id, nome=data['nome'], data_cadastro=data['data_cadastro'], ativo=data['ativo'], apelido=data['apelido'], local_trabalho=data['local_trabalho'])
-    elif (aba == 'barbearias'):
-        result = db.updateData(aba=aba, id=id, nome=data['nome'], responsavel=data['responsavel'], data_cadastro=data['data_cadastro'], ativo=data['ativo'], cep=data['cep'], email=data['email'], telefone=data['telefone'])
-    elif (aba == 'proprietarios'):
-        result = db.updateData(aba=aba, id=id, nome=data['nome'], dono_de=data['dono_de'], data_cadastro=data['data_cadastro'], ativo=data['ativo'],  email=data['email'], telefone=data['telefone'])
+async def updateData(aba: str, id: int, data: Annotated[dict, Body()]):
+    if (aba == 'barbeiro'):
+        result = db.set_Barbeiro(id, data)
+    elif (aba == 'barbearia'):
+        result = db.set_Barbearia(id, data)
+    elif (aba == 'proprietario'):
+        result = db.set_Proprietario(id, data)
     return JSONResponse(content=result, status_code=status.HTTP_202_ACCEPTED)
 
 
 @app.get("/{aba}/{id}")
-async def getData(aba: str, id: str):
-    resp = db.getData(aba=aba, id=id)
-    if resp:
-        return JSONResponse(resp, headers={"Referrer-Policy":"unsafe-url"})
+async def getData(aba: str, id: int):
+    result = None
+    if (aba == 'barbeiro'):
+        result = db.get_Barbeiro(id)
+    elif (aba == 'barbearia'):
+        result =  db.get_Barbearia(id)
+    elif (aba == 'proprietario'):
+        result =  db.get_Proprietario(id)
+    if result:
+        return JSONResponse(result, headers={"Referrer-Policy":"unsafe-url"})
     return JSONResponse(content=f'Id {id} not found', status_code=status.HTTP_404_NOT_FOUND)
 #
 # @app.websocket("/items/{item_id}/ws")
