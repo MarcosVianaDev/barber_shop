@@ -11,3 +11,4 @@ replit.nix
 .pythonlibs
 token.json
 credentials.json
+DB

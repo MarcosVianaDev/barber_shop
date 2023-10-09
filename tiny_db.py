@@ -34,6 +34,7 @@ class Barber_DB:
         self.__db_barbeiros = TinyDB('DB/barbeiros.json')
         self.__db_barbearias = TinyDB('DB/barbearias.json')
         self.__db_proprietarios = TinyDB('DB/proprietarios.json')
+        
 
     def create_Barbeiro(self, novo_barbeiro:Barbeiro) -> int:
         '''Create a new barbeiro and return ID'''
@@ -41,11 +42,12 @@ class Barber_DB:
 
     def get_Barbeiro(self, id: int | None = None) -> Barbeiro:
         if id:
-            return self.__db_barbeiros.get(id)
+            return self.__db_barbeiros.get(doc_id=id)
         else:
             return self.__db_barbeiros.all()
 
     def set_Barbeiro(self, id: int, doc:Barbeiro):
+        # print(id, doc)
         return self.__db_barbeiros.update(fields=doc, doc_ids=[id])
 
     def create_Barbearia(self, nova_barbearia:Barbearia) -> int:
@@ -54,7 +56,7 @@ class Barber_DB:
 
     def get_Barbearia(self, id: int | None = None) -> Barbearia:
         if id:
-            return self.__db_barbearias.get(id)
+            return self.__db_barbearias.get(doc_id=id)
         else:
             return self.__db_barbearias.all()
 
@@ -67,7 +69,7 @@ class Barber_DB:
 
     def get_Proprietario(self, id: int | None = None) -> Proprietario:
         if id:
-            return self.__db_proprietarios.get(id)
+            return self.__db_proprietarios.get(doc_id=id)
         else:
             return self.__db_proprietarios.all()
 
