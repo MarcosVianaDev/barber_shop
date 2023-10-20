@@ -2,7 +2,7 @@ from datetime import date
 from typing import Annotated
 
 from fastapi import (FastAPI, Body, WebSocket, WebSocketException, status)
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,6 +24,10 @@ app.add_middleware(
     # exposed_headers= HEADERS,
 )
 
+
+@app.get('/')
+def handleRoot():
+  return HTMLResponse(content="<h1>Barber API</h1>", status_code=status.HTTP_200_OK)
 
 @app.post("/{aba}/new")
 async def postData(aba: str, data: Annotated[dict, Body()]):
