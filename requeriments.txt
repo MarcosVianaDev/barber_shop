@@ -1,5 +1,6 @@
 fastapi
 websockets
-uvicorn
+uvicorn[standard]
+gunicorn
 tinydb
 pydantic

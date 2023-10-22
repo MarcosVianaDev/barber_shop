@@ -1,0 +1,12 @@
+server {
+                listen  80;
+                server_name barber_shop;
+
+                #logs
+                access_log /var/log/nginx/barber_shop.access.log;
+                error_log /var/log/nginx/barber_shop.error.log;
+
+                location / {
+                        proxy_pass http://unix:/home/marcos-viana/api/barber_shop/barber_shop.sock;
+                }
+        }

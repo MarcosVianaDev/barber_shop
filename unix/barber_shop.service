@@ -1,0 +1,13 @@
+[Unit]
+Description=FastAPI instance to serve barber_shop
+After=network.target
+
+[Service]
+User=marcos-viana
+Group=www-data
+WorkingDirectory=/home/marcos-viana/api/barber_shop
+Environment="PATH=/home/marcos-viana/api/barber_shop/venv/bin"
+ExecStart=/home/marcos-viana/api/barber_shop/venv/bin/gunicorn main:app --workers 2 -k uvicorn.workers.UvicornWorker --bind unix:barber_shop.sock --error-logfile /home/marcos-viana/api/barber_shop/error_log.txt
+
+[Install]
+WantedBy=multi-user.target

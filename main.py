@@ -27,7 +27,7 @@ app.add_middleware(
 
 @app.get('/')
 def handleRoot():
-  return HTMLResponse(content="<h1>Barber API</h1>", status_code=status.HTTP_200_OK)
+  return HTMLResponse(content="<h1>Barber Shop API</h1>", status_code=status.HTTP_200_OK)
 
 @app.post("/{aba}/new")
 async def postData(aba: str, data: Annotated[dict, Body()]):
@@ -89,4 +89,4 @@ async def getData(aba: str, id: int):
 if __name__ == "__main__":
   import uvicorn  # para rodar o server
   print('Runing...')
-  uvicorn.run(app, port=8080, host="0.0.0.0")
+  uvicorn.run(app, port=7733, host="0.0.0.0")
