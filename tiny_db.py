@@ -41,6 +41,10 @@ class Barber_DB:
         return self.__db_barbeiros.insert(novo_barbeiro)
 
     def get_Barbeiro(self, id: int | None = None) -> Barbeiro:
+        '''
+        Select a barbeiro by ID and returns their data. 
+        Or return all barbeiro data, if ID is not presents
+        '''
         if id:
             return self.__db_barbeiros.get(doc_id=id)
         else:
