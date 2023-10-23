@@ -53,6 +53,19 @@ async def updateData(aba: str, id: int, data: Annotated[dict, Body()]):
     result = db.set_Proprietario(id, data)
   return JSONResponse(content=result, status_code=status.HTTP_202_ACCEPTED)
 
+@app.get("/{aba}/all")
+async def getData(aba: str, id: int):
+  result = None
+  if (aba == 'barbeiro'):
+    result = db.get_Barbeiro()
+  elif (aba == 'barbearia'):
+    result = db.get_Barbearia()
+  elif (aba == 'proprietario'):
+    result = db.get_Proprietario()
+  if result:
+    return JSONResponse(result, headers={"Referrer-Policy": "unsafe-url"})
+  return JSONResponse(content=f'Nothing found',
+                      status_code=status.HTTP_404_NOT_FOUND)
 
 @app.get("/{aba}/{id}")
 async def getData(aba: str, id: int):
@@ -69,19 +82,6 @@ async def getData(aba: str, id: int):
                       status_code=status.HTTP_404_NOT_FOUND)
 
 
-@app.get("/{aba}/all")
-async def getData(aba: str, id: int):
-  result = None
-  if (aba == 'barbeiro'):
-    result = db.get_Barbeiro()
-  elif (aba == 'barbearia'):
-    result = db.get_Barbearia()
-  elif (aba == 'proprietario'):
-    result = db.get_Proprietario()
-  if result:
-    return JSONResponse(result, headers={"Referrer-Policy": "unsafe-url"})
-  return JSONResponse(content=f'Nothing found',
-                      status_code=status.HTTP_404_NOT_FOUND)
 
 #
 # @app.websocket("/items/{item_id}/ws")
